@@ -1,0 +1,6 @@
+各位同學：
+1. 經過測試後發現原本提供的模擬指令無法在 VCS 正常跑 generate function，需要加上 -sverilog 或 -v2005，會變成以下：
+vcs tb.v sigmoid.v lib.v -sverilog –full64 –R –debug_access+all +v2k 或
+vcs tb.v sigmoid.v lib.v -v2005 –full64 –R –debug_access+all +v2k
+
+2. 波形檔我們提供VCD與FSDB兩種，在本次作業裡差異不大，同樣都可以用nWave打開。附圖13-14行是VCD檔生成，15-16行是FSDB檔生成。助教給的testbench裡FSDB被註解掉，因此初次模擬沒有產生FSDB檔而是產生VCD檔，大家可以自己在把它加回來。
