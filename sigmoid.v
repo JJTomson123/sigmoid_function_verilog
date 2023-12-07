@@ -9,6 +9,13 @@ module sigmoid (
 );
 
 // Your design
+	wire [7:0] valid_x;
+	wire [50:0] number_start_ok;
+	assign number = number_start_ok;
+
+	start_ok stage00(clk, rst_n, i_in_valid, i_x, valid_x, number_start_ok);
+
+	
 
 endmodule
 
@@ -46,8 +53,44 @@ assign number = sum;
 
 endmodule
 
-module find_region(clk, rst_n, i_x_msb3, i_in_valid, region, number_find_region);
-	input clk, rst_n, i_in_valid;
+///////////////////////////////////////////////////////////////////////////
+
+module EIGHT_BIT_AN2#(
+	parameter BW = 8
+)(
+	output [BW-1:0] Z,
+	input  [BW-1:0] A,
+	input  [BW-1:0] B,
+	output [  50:0] number
+);
+
+wire [50:0] numbers [0:BW-1];
+
+genvar i;
+generate
+	for (i=0; i<BW; i=i+1) begin
+		AN2	an0(Z[i], A[i], B[i], number[i]);
+	end
+endgenerate
+
+//sum number of transistors
+reg [50:0] sum;
+integer j;
+always @(*) begin
+	sum = 0;
+	for (j=0; j<BW; j=j+1) begin 
+		sum = sum + numbers[j];
+	end
+end
+
+assign number = sum;
+
+endmodule
+
+///////////////////////////////////////////////////////////////////////////
+
+module find_region(clk, rst_n, i_x_msb3, region, number_find_region);
+	input clk, rst_n;
 	input [2:0] i_x_msb3;
 	output [2:0] region;
 	output [50:0] number_find_region;
@@ -59,11 +102,21 @@ module find_region(clk, rst_n, i_x_msb3, i_in_valid, region, number_find_region)
 
 	REGP#(.BW(3)) reg001(.clk(clk), .rst_n(rst_n), .Q(d_output), .D(i_x_msb3), .number(n_reg001));
 
+endmodule
 
+///////////////////////////////////////////////////////////////////////////////////////////
 
+module start_ok(clk, rst_n, i_in_valid, i_x, o_x, number_start_ok);
+	input clk, rst_n, i_in_valid;
+	input [7:0] i_x;
+	output [7:0] o_x;
+	output [50:0] number_start_ok;
 
+	EIGHT_BIT_AN2 EB_an2_00(.Z(o_x), .A(i_x), .B({8{i_in_valid}}), .number(number_start_ok));
 
 endmodule
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
 
 module n4Ton2();
 	input 
