@@ -93,19 +93,36 @@ endmodule
 
 ///////////////////////////////////////////////////////////////////////////
 
-module find_region(i_x_msb3, B, number_find_region);
-	input clk, rst_n;
+module find_region(i_x_msb3, const, number_find_region);
 	input [2:0] i_x_msb3;
 	output [2:0] region;
 	output [50:0] number_find_region;
-	wire [2:0] d_output;
-	assign number_find_region = n_reg001;
+	wire [5:0] const;
+	wire [2:0] i_x_msb3_n;
+	wire n4Ton2_truth, n2Ton1_truth, n1Top1_truth, p1Top2_truth, p2Top4_truth;
+	wire [50:0] n1_nd2, n1_nd3, n2_nd2, n2_nd3, n3_nd2, n1_iv, n2_iv, n3_iv;
+	wire [50:0] n3_nd3, n7_nd2, n4_nd2, n5_nd2, n6_nd2;
 
-	AN2()
-
-
-
+	assign number_find_region = n1_iv + n2_iv + n3_iv;
 	
+	IV iv_000(i_x_msb3_n[2], i_x_msb3[2], n1_iv);
+	IV iv_001(i_x_msb3_n[1], i_x_msb3[1], n2_iv);
+	IV iv_002(i_x_msb3_n[0], i_x_msb3[0], n3_iv);
+
+	ND2	nd2_000(n4Ton2_truth, i_x_msb3[2], i_x_msb3[1], n1_nd2);
+	ND3 nd3_000(n2Ton1_truth, i_x_msb3[2], i_x_msb3_n[1], i_x_msb3[0], n1_nd3);
+	ND2 nd2_001(n1Top1_truth, i_x_msb3_n[1], i_x_msb3_n[0], n2_nd2);
+	ND3 nd3_001(p1Top2_truth, i_x_msb3_n[2], i_x_msb3_n[1], i_x_msb3[0], n2_nd3);
+	ND2 nd2_010(p2Top4_truth, i_x_msb3_n[2], i_x_msb3[1], n3_nd2);
+
+
+	ND3 nd3_001(const[5], n1Top1_truth, p1Top2_truth, p2Top4_truth, n3_nd3);
+	ND2 nd2_002(const[4], n2Ton1_truth, p2Top4_truth, n7_nd2);
+	ND2 nd2_003(const[3], n4Ton2_truth, n2Ton1_truth, n4_nd2);
+	ND2 nd2_004(const[2], n4Ton2_truth, p1Top2_truth, n5_nd2);
+	ND2 nd2_005(const[1], p1Top2_truth, p2Top4_truth, n6_nd2);
+	ND2 nd2_006(const[0], n2Ton1_truth, p2Top4_truth, n6_nd2);
+
 
 endmodule
 
