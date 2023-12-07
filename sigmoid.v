@@ -9,13 +9,17 @@ module sigmoid (
 );
 
 // Your design
-	wire [7:0] valid_x;
-	wire [50:0] number_start_ok;
-	assign number = number_start_ok;
+	wire [7:0] valid_x, valid_x_r;
+	wire [50:0] number_start_ok, n_reg001;
+	assign number = number_start_ok + n_reg001;
 
-	start_ok stage00(clk, rst_n, i_in_valid, i_x, valid_x, number_start_ok);
+	start_ok stage00(i_in_valid, i_x, valid_x, number_start_ok);
 
-	
+	REGP#(.BW(8)) reg001(.clk(clk), .rst_n(rst_n), .Q(valid_x_r), .D(valid_x), .number(n_reg001));
+
+
+
+
 
 endmodule
 
@@ -69,7 +73,7 @@ wire [50:0] numbers [0:BW-1];
 genvar i;
 generate
 	for (i=0; i<BW; i=i+1) begin
-		AN2	an0(Z[i], A[i], B[i], number[i]);
+		AN2	an0(Z[i], A[i], B[i], numbers[i]);
 	end
 endgenerate
 
@@ -89,25 +93,26 @@ endmodule
 
 ///////////////////////////////////////////////////////////////////////////
 
-module find_region(clk, rst_n, i_x_msb3, region, number_find_region);
+module find_region(i_x_msb3, B, number_find_region);
 	input clk, rst_n;
 	input [2:0] i_x_msb3;
 	output [2:0] region;
 	output [50:0] number_find_region;
 	wire [2:0] d_output;
-	wire [50:0] n_reg001;
 	assign number_find_region = n_reg001;
 
-	
+	AN2()
 
-	REGP#(.BW(3)) reg001(.clk(clk), .rst_n(rst_n), .Q(d_output), .D(i_x_msb3), .number(n_reg001));
+
+
+	
 
 endmodule
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-module start_ok(clk, rst_n, i_in_valid, i_x, o_x, number_start_ok);
-	input clk, rst_n, i_in_valid;
+module start_ok(i_in_valid, i_x, o_x, number_start_ok);
+	input i_in_valid;
 	input [7:0] i_x;
 	output [7:0] o_x;
 	output [50:0] number_start_ok;
