@@ -45,3 +45,28 @@ end
 assign number = sum;
 
 endmodule
+
+module find_region(clk, rst_n, i_x_msb3, i_in_valid, region, number_find_region);
+	input clk, rst_n, i_in_valid;
+	input [2:0] i_x_msb3;
+	output [2:0] region;
+	output [50:0] number_find_region;
+	wire [2:0] d_output;
+	wire [50:0] n_reg001;
+	assign number_find_region = n_reg001;
+
+	
+
+	REGP#(.BW(3)) reg001(.clk(clk), .rst_n(rst_n), .Q(d_output), .D(i_x_msb3), .number(n_reg001));
+
+
+
+
+
+endmodule
+
+module n4Ton2();
+	input 
+
+
+endmodule
