@@ -10,11 +10,14 @@ module sigmoid (
 
 // Your design
 	wire [7:0] valid_x_1;
-	wire [50:0] n_reg001, n_reg002, number_x_di1, number_find_region;
+	wire [50:0] n_reg001, n_reg002, number_x_di1, number_find_region, number_adder1, number_adder2, n_reg004;
 	wire [6:0] i_x_div;
 	wire [6:0] constant, const_t1;
+	wire nouse, carryout_1;
+	wire [6:0] sum;
 
-
+	assign sum[6] = 1'b0;
+	assign o_out_valid = 
 	assign number = n_reg001;
 
 	//start_ok stage00(i_in_valid, i_x, valid_x, number_start_ok);
@@ -26,13 +29,10 @@ module sigmoid (
 	REGP#(.BW(7)) reg001(.clk(clk), .rst_n(rst_n), .Q(const_t1), .D(constant), .number(n_reg002));
 
 
+	adder_adder	adad1(valid_x_1[3:1], const_t1[2:0], 1'b0, sum[2:0], carryout_1, number_adder1);
+	adder_adder	adad2(valid_x_1[6:4], const_t1[5:3], carryout_1, sum[5:3], nouse, number_adder2);
 
-
-
-
-
-
-
+	REGP#(.BW(7)) reg001(.clk(clk), .rst_n(rst_n), .Q(o_y[15:9]), .D(sum), .number(n_reg004));
 
 
 endmodule
@@ -81,13 +81,14 @@ module THREE_BIT_ADDER#(
 	output [BW-1:0] P;
 	input  [BW-1:0] A,
 	input  [BW-1:0] B,
+	input  CI;
 	output [  50:0] number
 
 );
 
 wire [50:0] numbers [0:BW-1];
 wire [50:0] numbers2 [0:BW-1];
-assign CO[0] = 1'b0;
+assign CO[0] = CI;
 
 genvar i;
 generate
@@ -195,13 +196,21 @@ endmodule */
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-module adder_adder(a, b, c);
-	input [6:0] A,B;
-	output [6:0] C;
-	wire [] temp;
+module adder_adder(a, b, carryin, sum, carryout, number);
+	input [2:0] a,b;
+	input carryin;
+	output [2:0] sum;
+	output carryout;
+	output [50:0] number;
+	wire [2:0] p_o;
+	wire [3:0] co_o;
+	wire [50:0] number_nand3, number_mux1, n_tbadder00;
+	assign number = number_nand3 + number_mux1 + n_tbadder00;
 
+	THREE_BIT_ADDER#(.BW(3)) tbadder001(.S(sum), .CO(co_o), .P(p_o), .A(a), .B(b), .CI(carryin), .number(n_tbadder00));
 
-	THREE_BIT_ADDER#(.BW(3)) tbadder001(.S(s_o), .CO(co_o), .P(p_o), .A(a), .B(b), .number(n_reg002));
+	ND3 nand12(temp1,p_o[0],p_o[1],p_o[2],number_nand3);
 
+	MUX21H zx126(carryout, co_o, carryin, temp1, number_mux1);
 
 endmodule
