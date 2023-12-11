@@ -10,12 +10,14 @@ module sigmoid (
 
 // Your design
 	wire [7:0] valid_x, valid_x_r;
+	wire valid;
 	wire [50:0] number_start_ok, n_reg001;
 	assign number = number_start_ok + n_reg001;
 
-	start_ok stage00(i_in_valid, i_x, valid_x, number_start_ok);
+	//start_ok stage00(i_in_valid, i_x, valid_x, number_start_ok);
+	REGP#(.BW(9)) reg001(.clk(clk), .rst_n(rst_n), .Q({valid_x_r,valid}), .D({i_x,i_in_valid}), .number(n_reg001));
 
-	REGP#(.BW(8)) reg001(.clk(clk), .rst_n(rst_n), .Q(valid_x_r), .D(valid_x), .number(n_reg001));
+
 
 
 
@@ -93,17 +95,39 @@ endmodule
 
 ///////////////////////////////////////////////////////////////////////////
 
+module x_di1(i_x, i_a, control, number_x_di1);
+	input [ 7:0] i_x;
+	input control;
+	output [6:0] i_a;
+	output [50:0] number_x_di1;
+	wire [50:0] number1, number2, number3, number4, number5, number6;
+	assign number_x_di1 = number1 + number2 + number3 + number4 + number5 + number6;
+
+	assign i_a[6] = i_x[7];
+	MUX21H zx11(i_a[5], i_x[6], i_x[7], control, number1);
+	MUX21H zx12(i_a[4], i_x[5], i_x[6], control, number2);
+	MUX21H zx13(i_a[3], i_x[4], i_x[5], control, number3);
+	MUX21H zx14(i_a[2], i_x[3], i_x[4], control, number4);
+	MUX21H zx15(i_a[1], i_x[2], i_x[3], control, number5);
+	MUX21H zx16(i_a[0], i_x[1], i_x[2], control, number6);
+
+
+endmodule
+
+//////////////////////////////////////////////////////////////////////////////
+
 module find_region(i_x_msb3, const, number_find_region);
 	input [2:0] i_x_msb3;
 	output [2:0] region;
 	output [50:0] number_find_region;
-	wire [5:0] const;
+	wire [6:0] const;
 	wire [2:0] i_x_msb3_n;
 	wire n4Ton2_truth, n2Ton1_truth, n1Top1_truth, p1Top2_truth, p2Top4_truth;
 	wire [50:0] n1_nd2, n1_nd3, n2_nd2, n2_nd3, n3_nd2, n1_iv, n2_iv, n3_iv;
 	wire [50:0] n3_nd3, n7_nd2, n4_nd2, n5_nd2, n6_nd2;
 
 	assign number_find_region = n1_iv + n2_iv + n3_iv;
+	assign const[6] = 1'b0;
 	
 	IV iv_000(i_x_msb3_n[2], i_x_msb3[2], n1_iv);
 	IV iv_001(i_x_msb3_n[1], i_x_msb3[1], n2_iv);
