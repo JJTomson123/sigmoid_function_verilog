@@ -17,7 +17,6 @@ module sigmoid (
 	wire [6:0] sum;
 
 	assign sum[6] = 1'b0;
-	assign o_out_valid = 
 	assign number = n_reg001;
 
 	//start_ok stage00(i_in_valid, i_x, valid_x, number_start_ok);
@@ -26,13 +25,13 @@ module sigmoid (
 	x_di1 divide1(i_x[7:1], i_x_div, number_x_di1);
 
 	REGP#(.BW(8)) reg001(.clk(clk), .rst_n(rst_n), .Q(valid_x_1), .D({i_x_div,i_in_valid}), .number(n_reg001));
-	REGP#(.BW(7)) reg001(.clk(clk), .rst_n(rst_n), .Q(const_t1), .D(constant), .number(n_reg002));
+	REGP#(.BW(7)) reg002(.clk(clk), .rst_n(rst_n), .Q(const_t1), .D(constant), .number(n_reg002));
 
 
 	adder_adder	adad1(valid_x_1[3:1], const_t1[2:0], 1'b0, sum[2:0], carryout_1, number_adder1);
 	adder_adder	adad2(valid_x_1[6:4], const_t1[5:3], carryout_1, sum[5:3], nouse, number_adder2);
 
-	REGP#(.BW(7)) reg001(.clk(clk), .rst_n(rst_n), .Q(o_y[15:9]), .D(sum), .number(n_reg004));
+	REGP#(.BW(8)) reg003(.clk(clk), .rst_n(rst_n), .Q({o_y[15:9],o_out_valid}), .D({sum,valid_x_1[0]}), .number(n_reg004));
 
 
 endmodule
@@ -78,10 +77,10 @@ module THREE_BIT_ADDER#(
 )(
 	output [BW-1:0] S,
 	output [  BW:0] CO,
-	output [BW-1:0] P;
+	output [BW-1:0] P,
 	input  [BW-1:0] A,
 	input  [BW-1:0] B,
-	input  CI;
+	input  CI,
 	output [  50:0] number
 
 );
@@ -150,13 +149,12 @@ endmodule
 
 module find_region(i_x_msb3, const, number_find_region);
 	input [2:0] i_x_msb3;
-	output [2:0] region;
+	output [6:0] const;
 	output [50:0] number_find_region;
-	wire [6:0] const;
 	wire [2:0] i_x_msb3_n;
 	wire n4Ton2_truth, n2Ton1_truth, n1Top1_truth, p1Top2_truth, p2Top4_truth;
 	wire [50:0] n1_nd2, n1_nd3, n2_nd2, n2_nd3, n3_nd2, n1_iv, n2_iv, n3_iv;
-	wire [50:0] n3_nd3, n7_nd2, n4_nd2, n5_nd2, n6_nd2;
+	wire [50:0] n3_nd3, n7_nd2, n4_nd2, n5_nd2, n6_nd2, n8_nd2;
 
 	assign number_find_region = n1_iv + n2_iv + n3_iv;
 	assign const[6] = 1'b0;
@@ -172,7 +170,7 @@ module find_region(i_x_msb3, const, number_find_region);
 	ND2 nd2_010(p2Top4_truth, i_x_msb3_n[2], i_x_msb3[1], n3_nd2);
 
 
-	ND3 nd3_001(const[5], n1Top1_truth, p1Top2_truth, p2Top4_truth, n3_nd3);
+	ND3 nd3_002(const[5], n1Top1_truth, p1Top2_truth, p2Top4_truth, n3_nd3);
 	ND2 nd2_002(const[4], n2Ton1_truth, p2Top4_truth, n7_nd2);
 	ND2 nd2_003(const[3], n4Ton2_truth, n2Ton1_truth, n4_nd2);
 	ND2 nd2_004(const[2], n4Ton2_truth, p1Top2_truth, n5_nd2);
@@ -211,6 +209,6 @@ module adder_adder(a, b, carryin, sum, carryout, number);
 
 	ND3 nand12(temp1,p_o[0],p_o[1],p_o[2],number_nand3);
 
-	MUX21H zx126(carryout, co_o, carryin, temp1, number_mux1);
+	MUX21H zx126(carryout, co_o[3], carryin, temp1, number_mux1);
 
 endmodule
