@@ -9,13 +9,25 @@ module sigmoid (
 );
 
 // Your design
-	wire [7:0] valid_x, valid_x_r;
-	wire valid;
-	wire [50:0] number_start_ok, n_reg001;
-	assign number = number_start_ok + n_reg001;
+	wire [7:0] valid_x_1;
+	wire [50:0] n_reg001, n_reg002, number_x_di1, number_find_region;
+	wire [6:0] i_x_div;
+	wire [6:0] constant, const_t1;
+
+
+	assign number = n_reg001;
 
 	//start_ok stage00(i_in_valid, i_x, valid_x, number_start_ok);
-	REGP#(.BW(9)) reg001(.clk(clk), .rst_n(rst_n), .Q({valid_x_r,valid}), .D({i_x,i_in_valid}), .number(n_reg001));
+	find_region fr_ok(i_x[7:5], constant, number_find_region);
+	
+	x_di1 divide1(i_x[7:1], i_x_div, number_x_di1);
+
+	REGP#(.BW(8)) reg001(.clk(clk), .rst_n(rst_n), .Q(valid_x_1), .D({i_x_div,i_in_valid}), .number(n_reg001));
+	REGP#(.BW(7)) reg001(.clk(clk), .rst_n(rst_n), .Q(const_t1), .D(constant), .number(n_reg002));
+
+
+
+
 
 
 
@@ -61,55 +73,74 @@ endmodule
 
 ///////////////////////////////////////////////////////////////////////////
 
-module EIGHT_BIT_AN2#(
-	parameter BW = 8
+module THREE_BIT_ADDER#(
+	parameter BW = 3
 )(
-	output [BW-1:0] Z,
+	output [BW-1:0] S,
+	output [  BW:0] CO,
+	output [BW-1:0] P;
 	input  [BW-1:0] A,
 	input  [BW-1:0] B,
 	output [  50:0] number
+
 );
 
 wire [50:0] numbers [0:BW-1];
+wire [50:0] numbers2 [0:BW-1];
+assign CO[0] = 1'b0;
 
 genvar i;
 generate
 	for (i=0; i<BW; i=i+1) begin
-		AN2	an0(Z[i], A[i], B[i], numbers[i]);
+		FA1 fa000(CO[i+1],S[i],A[i],B[i],CO[i],numbers[i]);
+		EO xor000(P[i],A[i],B[i],numbers2[i]);
 	end
 endgenerate
 
 //sum number of transistors
-reg [50:0] sum;
+reg [50:0] sum, sum2;
 integer j;
 always @(*) begin
 	sum = 0;
+	sum2 = 0;
 	for (j=0; j<BW; j=j+1) begin 
 		sum = sum + numbers[j];
+		sum2 = sum2 + numbers2[j];
 	end
 end
 
-assign number = sum;
+assign number = sum + sum2;
 
 endmodule
 
 ///////////////////////////////////////////////////////////////////////////
 
-module x_di1(i_x, i_a, control, number_x_di1);
-	input [ 7:0] i_x;
-	input control;
-	output [6:0] i_a;
+module x_di1(i_x, i_c, number_x_di1);
+	input [6:0] i_x;
+	output [6:0] i_c;
 	output [50:0] number_x_di1;
 	wire [50:0] number1, number2, number3, number4, number5, number6;
-	assign number_x_di1 = number1 + number2 + number3 + number4 + number5 + number6;
+	wire [50:0] number11, number22, number33, number44, number55, number66;
+	assign number_x_di1 = number1 + number2 + number3 + number4 + number5 + number6 + number11 + number22 + number33 + number44 + number55 + number66;
+	wire [6:0] i_a;
 
-	assign i_a[6] = i_x[7];
-	MUX21H zx11(i_a[5], i_x[6], i_x[7], control, number1);
-	MUX21H zx12(i_a[4], i_x[5], i_x[6], control, number2);
-	MUX21H zx13(i_a[3], i_x[4], i_x[5], control, number3);
-	MUX21H zx14(i_a[2], i_x[3], i_x[4], control, number4);
-	MUX21H zx15(i_a[1], i_x[2], i_x[3], control, number5);
-	MUX21H zx16(i_a[0], i_x[1], i_x[2], control, number6);
+	assign i_c[6] = i_a[6];
+	assign i_a[6] = i_x[6];
+	
+	MUX21H zx11(i_a[5], i_x[5], i_x[6], i_x[4], number1);
+	MUX21H zx12(i_a[4], i_x[4], i_x[5], i_x[4], number2);
+	MUX21H zx13(i_a[3], i_x[3], i_x[4], i_x[4], number3);
+	MUX21H zx14(i_a[2], i_x[2], i_x[3], i_x[4], number4);
+	MUX21H zx15(i_a[1], i_x[1], i_x[2], i_x[4], number5);
+	MUX21H zx16(i_a[0], i_x[0], i_x[1], i_x[4], number6);
+
+	
+	MUX21H zx111(i_c[5], i_a[5], i_a[6], i_x[5], number11);
+	MUX21H zx122(i_c[4], i_a[4], i_a[6], i_x[5], number22);
+	MUX21H zx133(i_c[3], i_a[3], i_a[5], i_x[5], number33);
+	MUX21H zx144(i_c[2], i_a[2], i_a[4], i_x[5], number44);
+	MUX21H zx155(i_c[1], i_a[1], i_a[3], i_x[5], number55);
+	MUX21H zx166(i_c[0], i_a[0], i_a[2], i_x[5], number66);
 
 
 endmodule
@@ -145,14 +176,14 @@ module find_region(i_x_msb3, const, number_find_region);
 	ND2 nd2_003(const[3], n4Ton2_truth, n2Ton1_truth, n4_nd2);
 	ND2 nd2_004(const[2], n4Ton2_truth, p1Top2_truth, n5_nd2);
 	ND2 nd2_005(const[1], p1Top2_truth, p2Top4_truth, n6_nd2);
-	ND2 nd2_006(const[0], n2Ton1_truth, p2Top4_truth, n6_nd2);
+	ND2 nd2_006(const[0], n2Ton1_truth, p2Top4_truth, n8_nd2);
 
 
 endmodule
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-module start_ok(i_in_valid, i_x, o_x, number_start_ok);
+/* module start_ok(i_in_valid, i_x, o_x, number_start_ok);
 	input i_in_valid;
 	input [7:0] i_x;
 	output [7:0] o_x;
@@ -160,12 +191,17 @@ module start_ok(i_in_valid, i_x, o_x, number_start_ok);
 
 	EIGHT_BIT_AN2 EB_an2_00(.Z(o_x), .A(i_x), .B({8{i_in_valid}}), .number(number_start_ok));
 
-endmodule
+endmodule */
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-module n4Ton2();
-	input 
+module adder_adder(a, b, c);
+	input [6:0] A,B;
+	output [6:0] C;
+	wire [] temp;
+
+
+	THREE_BIT_ADDER#(.BW(3)) tbadder001(.S(s_o), .CO(co_o), .P(p_o), .A(a), .B(b), .number(n_reg002));
 
 
 endmodule
