@@ -10,8 +10,8 @@ module sigmoid (
 
 // Your design
 	wire [50:0] n_reg001, number_x_di1, number_find_region, number_adder1, number_adder2;
-	wire [7:0] i_x_div;
-	wire [7:0] constant;
+	wire [6:0] i_x_div;
+	wire [6:0] constant;
 	wire nouse, carryout_1;
 	wire [6:0] sum;
 
@@ -114,17 +114,15 @@ endmodule
 
 module x_di1(i_x, i_c, number_x_di1);
 	input [7:0] i_x;
-	output [7:0] i_c;
+	output [6:0] i_c;
 	output [50:0] number_x_di1;
 	wire [50:0] number0, number1, number2, number3, number4, number5, number6, number7, inv_n1, inv_n2;
 	wire [50:0] number00, number11, number22, number33, number44, number55, number66, number77, mux_n2;
 	assign number_x_di1 = number1 + number2 + number3 + number4 + number5 + number6 + number7 + mux_n2 + number0;
 	assign mux_n2 = number11 + number22 + number33 + number44 + number55 + number66 + number77 + number00 + inv_n1 + inv_n2;
-	wire [7:0] i_a;
+	wire [6:0] i_a;
 	wire [1:0] ctrl, i_x_n;
 
-	assign i_c[7] = i_a[7];
-	assign i_a[7] = i_x[7];
 
 	IV inv_020(i_x_n[0], i_x[5], inv_n1);
 	IV inv_021(i_x_n[1], i_x[6], inv_n2);
@@ -139,8 +137,8 @@ module x_di1(i_x, i_c, number_x_di1);
 	MUX21H zx15(i_a[1], i_x[1], i_x[2], ctrl[0], number5);
 	MUX21H zx16(i_a[0], i_x[0], i_x[1], ctrl[0], number6);
 
-	MUX21H zx177(i_c[6], i_a[6], i_a[7], ctrl[1], number77);
-	MUX21H zx111(i_c[5], i_a[5], i_a[7], ctrl[1], number11);
+	MUX21H zx177(i_c[6], i_a[6], i_x[7], ctrl[1], number77);
+	MUX21H zx111(i_c[5], i_a[5], i_x[7], ctrl[1], number11);
 	MUX21H zx122(i_c[4], i_a[4], i_a[6], ctrl[1], number22);
 	MUX21H zx133(i_c[3], i_a[3], i_a[5], ctrl[1], number33);
 	MUX21H zx144(i_c[2], i_a[2], i_a[4], ctrl[1], number44);
@@ -154,17 +152,16 @@ endmodule
 
 module find_region(i_x_msb3, const, number_find_region);
 	input [2:0] i_x_msb3;
-	output [7:0] const;
+	output [6:0] const;
 	output [50:0] number_find_region;
 	wire [2:0] i_x_msb3_n;
 	wire n4tn3, n3tn2, n2tn1, n1tp1, p1tp2, p2tp3, p3tp4, n1tp1_1, n1tp1_2;
-	wire [50:0] ivv0, ivv1, n1_iv, n2_iv, n3_iv, n1_an3, n2_an3, n1_or2, n1_nd3, n2_nd3, n3_nd3, n4_nd3, n5_nd3, n6_nd3, nd_num1;
+	wire [50:0] n1_iv, n2_iv, n3_iv, n1_an3, n2_an3, n1_or2, n1_nd3, n2_nd3, n3_nd3, n4_nd3, n5_nd3, n6_nd3, nd_num1;
 	wire [50:0] n1_nd4, n2_nd4, n3_nd4, n3_nd2, n4_nd2, nd_num2;
 
 	assign number_find_region = n1_iv + n2_iv + n3_iv + nd_num1 + nd_num2;
 	assign nd_num1 = n1_an3 + n2_an3 + n1_or2 + n1_nd3 + n2_nd3 + n3_nd3 + n4_nd3 + n5_nd3 + n6_nd3;
 	assign nd_num2 = n1_nd4 + n2_nd4 + n3_nd4 + n3_nd2 + n4_nd2;
-	assign const[7] = 1'b0;
 	
 	IV iv_000(i_x_msb3_n[2], i_x_msb3[2], n1_iv);
 	IV iv_001(i_x_msb3_n[1], i_x_msb3[1], n2_iv);
