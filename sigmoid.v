@@ -13,10 +13,11 @@ module sigmoid (
 	wire [7:0] i_x_div;
 	wire [7:0] constant;
 	wire nouse, carryout_1;
-	wire [7:0] sum;
+	wire [6:0] sum;
 
 	assign number = n_reg001 + number_find_region + number_x_di1 + number_adder1 + number_adder2;
 	assign o_y[7:0] = 8'd0;
+	assign o_y[15] = 1'b0;
 
 	//start_ok stage00(i_in_valid, i_x, valid_x, number_start_ok);
 	find_region fr_ok(i_x[7:5], constant, number_find_region);
@@ -26,10 +27,12 @@ module sigmoid (
 	//REGP#(.BW(9)) reg001(.clk(clk), .rst_n(rst_n), .Q(valid_x_1), .D({i_in_valid,i_x_div}), .number(n_reg001));
 	//REGP#(.BW(7)) reg002(.clk(clk), .rst_n(rst_n), .Q(const_t1), .D(constant), .number(n_reg002));
 
-	adder_adder	adad1(i_x_div[3:0], constant[3:0], 1'b0, sum[3:0], carryout_1, number_adder1);
-	adder_adder	adad2(i_x_div[7:4], constant[7:4], carryout_1, sum[7:4], nouse, number_adder2);
+	//adder_adder	adad1(i_x_div[3:0], constant[3:0], 1'b0, sum[3:0], carryout_1, number_adder1);
+	//adder_adder	adad2(i_x_div[7:4], constant[7:4], carryout_1, sum[7:4], nouse, number_adder2);
+	THREE_BIT_ADDER#(.BW(4)) tbadder001(.S(sum[3:0]), .carryout(carryout_1), .A(i_x_div[3:0]), .B(constant[3:0]), .CI(1'b0), .number(number_adder1));
+	THREE_BIT_ADDER#(.BW(3)) tbadder002(.S(sum[6:4]), .carryout(nouse), .A(i_x_div[6:4]), .B(constant[6:4]), .CI(carryout_1), .number(number_adder2));
 
-	REGP#(.BW(9)) reg003(.clk(clk), .rst_n(rst_n), .Q({o_y[15:8],o_out_valid}), .D({sum,i_in_valid}), .number(n_reg001));
+	REGP#(.BW(8)) reg003(.clk(clk), .rst_n(rst_n), .Q({o_y[14:8],o_out_valid}), .D({sum[6:0],i_in_valid}), .number(n_reg001));
 
 
 endmodule
@@ -74,40 +77,36 @@ module THREE_BIT_ADDER#(
 	parameter BW = 3
 )(
 	output [BW-1:0] S,
-	output [  BW:0] CO,
-	output [BW-1:0] P,
+	output carryout,
 	input  [BW-1:0] A,
 	input  [BW-1:0] B,
 	input  CI,
 	output [  50:0] number
 
 );
-
+wire [BW:0] CO;
 wire [50:0] numbers [0:BW-1];
-wire [50:0] numbers2 [0:BW-1];
 assign CO[0] = CI;
+assign carryout = CO[BW];
 
 genvar i;
 generate
 	for (i=0; i<BW; i=i+1) begin
 		FA1 fa000(CO[i+1],S[i],A[i],B[i],CO[i],numbers[i]);
-		EO xor000(P[i],A[i],B[i],numbers2[i]);
 	end
 endgenerate
 
 //sum number of transistors
-reg [50:0] sum, sum2;
+reg [50:0] sum;
 integer j;
 always @(*) begin
 	sum = 0;
-	sum2 = 0;
 	for (j=0; j<BW; j=j+1) begin 
 		sum = sum + numbers[j];
-		sum2 = sum2 + numbers2[j];
 	end
 end
 
-assign number = sum + sum2;
+assign number = sum;
 
 endmodule
 
@@ -219,21 +218,21 @@ endmodule */
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-module adder_adder(a, b, carryin, sum, carryout, number);
+/* module adder_adder(a, b, carryin, sum, carryout, number);
 	input [3:0] a,b;
 	input carryin;
 	output [3:0] sum;
 	output carryout;
 	output [50:0] number;
-	wire [3:0] p_o;
 	wire [4:0] co_o;
-	wire [50:0] number_nand3, number_mux1, n_tbadder00;
-	assign number = number_nand3 + number_mux1 + n_tbadder00;
+	wire [50:0] n_tbadder00;
+	assign number = n_tbadder00;//number_nand3 + number_mux1 + n_tbadder00;
+	assign carryout = co_o[4];
 
-	THREE_BIT_ADDER#(.BW(4)) tbadder001(.S(sum), .CO(co_o), .P(p_o), .A(a), .B(b), .CI(carryin), .number(n_tbadder00));
+	THREE_BIT_ADDER#(.BW(4)) tbadder001(.S(sum), .CO(co_o), .A(a), .B(b), .CI(carryin), .number(n_tbadder00));
 
-	ND4 nand112(temp1, p_o[0], p_o[1], p_o[2], p_o[3], number_nand3);
+	//ND4 nand112(temp1, p_o[0], p_o[1], p_o[2], p_o[3], number_nand3);
 
-	MUX21H zx126(carryout, co_o[4], carryin, temp1, number_mux1);
+	//MUX21H zx126(carryout, carryin, co_o[4], temp1, number_mux1);
 
-endmodule
+endmodule */
