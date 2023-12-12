@@ -16,7 +16,7 @@ module sigmoid (
 	wire [7:0] sum;
 
 	assign number = n_reg001 + number_find_region + number_x_di1 + number_adder1 + number_adder2;
-	assign o_y[7:0] = 9'd0;
+	assign o_y[7:0] = 8'd0;
 
 	//start_ok stage00(i_in_valid, i_x, valid_x, number_start_ok);
 	find_region fr_ok(i_x[7:5], constant, number_find_region);
@@ -160,11 +160,11 @@ module find_region(i_x_msb3, const, number_find_region);
 	wire [2:0] i_x_msb3_n;
 	wire n4tn3, n3tn2, n2tn1, n1tp1, p1tp2, p2tp3, p3tp4, n1tp1_1, n1tp1_2;
 	wire [50:0] ivv0, ivv1, n1_iv, n2_iv, n3_iv, n1_an3, n2_an3, n1_or2, n1_nd3, n2_nd3, n3_nd3, n4_nd3, n5_nd3, n6_nd3, nd_num1;
-	wire [50:0] n1_nd4, n2_nd4, n2_nd2, n3_nd2, n4_nd2, nd_num2;
+	wire [50:0] n1_nd4, n2_nd4, n3_nd4, n3_nd2, n4_nd2, nd_num2;
 
-	assign number_find_region = n1_iv + n2_iv + n3_iv + nd_num1 + nd_num2 + ivv0 + ivv1;
+	assign number_find_region = n1_iv + n2_iv + n3_iv + nd_num1 + nd_num2;
 	assign nd_num1 = n1_an3 + n2_an3 + n1_or2 + n1_nd3 + n2_nd3 + n3_nd3 + n4_nd3 + n5_nd3 + n6_nd3;
-	assign nd_num2 = n1_nd4 + n2_nd4 + n2_nd2 + n3_nd2 + n4_nd2;
+	assign nd_num2 = n1_nd4 + n2_nd4 + n3_nd4 + n3_nd2 + n4_nd2;
 	assign const[7] = 1'b0;
 	
 	IV iv_000(i_x_msb3_n[2], i_x_msb3[2], n1_iv);
@@ -192,11 +192,15 @@ module find_region(i_x_msb3, const, number_find_region);
 
 	ND4 nd3_072(const[6], n1tp1, p1tp2, p2tp3, p3tp4, n1_nd4);
 	ND4 nd3_002(const[5], n3tn2, n2tn1, p2tp3, p3tp4, n2_nd4);
-	ND2 nd2_002(const[4], n4tn3, n2tn1, n2_nd2);
-	ND2 nd2_003(const[3], p1tp2, p3tp4, n3_nd2);
-	ND2 nd2_004(const[2], p1tp2, p3tp4, n4_nd2);
-	IV iv_0190(const[1], n4tn3, ivv0);
-	IV iv_0199(const[0], n4tn3, ivv1);
+	ND4 nd2_002(const[4], n4tn3, n2tn1, p1tp2, p3tp4, n3_nd4);
+	//ND2 nd2_003(const[3], p1tp2, p3tp4, n3_nd2);
+	//ND2 nd2_004(const[2], p1tp2, p3tp4, n4_nd2);
+	assign const[3] = 1'b0;
+	assign const[2] = 1'b0;
+	//IV iv_0190(const[1], n4tn3, ivv0);
+	//IV iv_0199(const[0], n4tn3, ivv1);
+	ND2 nd2_003(const[1], n4tn3, p1tp2, n3_nd2);
+	ND2 nd2_004(const[0], n4tn3, p1tp2, n4_nd2);
 
 
 endmodule
